@@ -1,17 +1,31 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\QuizController;
-use App\Http\Controllers\MateriController;
-
+use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\DashboardController;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::resource('materi', MateriController::class);
-Route::post('/quiz/store', [QuizController::class, 'store'])->name('quiz.store');
-Route::get('/quizzes', [QuizController::class, 'index'])->name('quiz.index');
-Route::get('/quizzes/create', [QuizController::class, 'create'])->name('quiz.create');
-Route::post('/quizzes', [QuizController::class, 'store'])->name('quiz.store');
-Route::get('/quizzes/{quiz}/edit', [QuizController::class, 'edit'])->name('quiz.edit');
-Route::put('/quizzes/{quiz}', [QuizController::class, 'update'])->name('quiz.update');
-Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quiz.destroy');
+
+Route::get('/mahasiswa', [MahasiswaController::class, 'index']);
+
+Route::get('/register', [RegisterController::class, 'show'])->name('register.show');
+Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+
+Route::get('/login', [LoginController::class, 'show'])->name('login');
+Route::post('/login', [LoginController::class, 'auth'])->name('login.auth');
+
+Route::group(['middleware' => ['auth']], function() {
+    Route::get('/logout', [LoginController::class, 'logout'])->name('login.logout');
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+
+    Route::get('/data-pengguna',[DashboardController::class, 'showDataPengguna'])->name('dashboard.showDataPengguna');
+});
+
+Route::get('/data-pengguna', [DashboardController::class, 'showDataPengguna'])->name('dashboard.showDataPengguna')->middleware('admin');
+Route::group(['middleware' => ['admin']], function(){
+    Route::get('/data-pengguna', [DashboardController::class, 'showDataPengguna'])->name('dashboard.showDataPengguna');
+});
